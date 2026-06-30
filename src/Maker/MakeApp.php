@@ -1,0 +1,74 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Spora\Maker\Maker;
+
+use Spora\Maker\Generator;
+use Spora\Maker\MakerInterface;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+/**
+ * Re-creates the project App entry class.
+ *
+ *   php bin/spora make:app
+ *
+ * Use this if you deleted app/App.php and want a fresh reference.
+ */
+final class MakeApp extends Command implements MakerInterface
+{
+    public function __construct()
+    {
+        parent::__construct('make:app');
+        $this->setDescription('Recreate the app/App.php entry-point class.');
+    }
+
+    protected function configure(): void
+    {
+        // Name and description set in constructor so new MakeApp()->getName()
+        // returns 'make:app' without requiring Application::add() to call
+        // configure() first.
+    }
+
+    public function generate(InputInterface $input, OutputInterface $output, Generator $generator): void
+    {
+        $contents = <<<'PHP'
+            <?php
+
+            declare(strict_types=1);
+
+            namespace App;
+
+            use Spora\Extensions\AbstractExtension;
+
+            /**
+             * Project-level App extension. Discovered by AppLoader via reflection;
+             * one per installation, no manifest, no slug.
+             *
+             * Override hooks to wire project-local code into the framework:
+             *   tools(), drivers(), recipePaths(), schemaVersion(), migrationsPath(),
+             *   apps(), register(\DI\ContainerBuilder), routes(), boot().
+             *
+             * Promote to a plugin later: rename App → Plugin, add plugin.json, ship
+             * as a Composer package.
+             */
+            final class App extends AbstractExtension
+            {
+                public function getName(): string
+                {
+                    return 'My Spora App';
+                }
+            }
+
+            PHP;
+
+        $generator->generateFile('app/App.php', $contents);
+    }
+
+    public function getSuccessMessage(): string
+    {
+        return 'app/App.php recreated. Override the hooks you need.';
+    }
+}
