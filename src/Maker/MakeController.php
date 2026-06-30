@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Spora\Maker\Maker;
 
+use Spora\Maker\AbstractMaker;
 use Spora\Maker\Generator;
-use Spora\Maker\MakerInterface;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -23,32 +21,22 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * (RouteDefinitions-style) rather than via attributes, so the route snippet
  * is printed for the developer to paste.
  */
-final class MakeController extends Command implements MakerInterface
+final class MakeController extends AbstractMaker
 {
     public function __construct()
     {
-        parent::__construct('make:controller');
-        $this->setDescription('Create a new HTTP controller under app/Http/Controllers/');
-        $this->addArgument(
-            'name',
-            InputArgument::REQUIRED,
+        parent::__construct(
+            'make:controller',
+            'Create a new HTTP controller under app/Http/Controllers/',
             'The controller basename (e.g. "MyApi" → MyApiController).',
         );
-    }
-
-    protected function configure(): void
-    {
-        // Argument added in constructor so new MakeController()->getDefinition()
-        // has 'name' available without requiring Application::add() to call
-        // configure() first (matters for direct test invocation).
     }
 
     public function generate(InputInterface $input, OutputInterface $output, Generator $generator): void
     {
         $io = new SymfonyStyle($input, $output);
-        $baseName = ucfirst((string) $input->getArgument('name'));
-        $className = str_ends_with($baseName, 'Controller') ? $baseName : $baseName . 'Controller';
-        $routePath = '/api/v1/' . $this->toKebabCase($baseName);
+        $className = $this->normalisedClassName($input, 'Controller');
+        $routePath = '/api/v1/' . $this->toKebabCase($className);
 
         $contents = <<<PHP
             <?php
@@ -75,8 +63,7 @@ final class MakeController extends Command implements MakerInterface
 
             PHP;
 
-        $relativePath = 'app/Http/Controllers/' . $className . '.php';
-        $generator->generateFile($relativePath, $contents);
+        $generator->generateFile('app/Http/Controllers/' . $className . '.php', $contents);
 
         $io->writeln('');
         $io->writeln('Paste this into <info>app/App.php</info> inside <comment>routes(MiddlewareRouteCollector \$r)</comment>:');
@@ -94,11 +81,5 @@ final class MakeController extends Command implements MakerInterface
     public function getSuccessMessage(): string
     {
         return 'Controller class created. Next: add route wiring to app/App.php.';
-    }
-
-    private function toKebabCase(string $className): string
-    {
-        $kebab = strtolower((string) preg_replace('/(?<!^)([A-Z])/', '-$1', $className));
-        return ltrim($kebab, '-');
     }
 }

@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Spora\Maker\Maker;
 
+use Spora\Maker\AbstractMaker;
 use Spora\Maker\Generator;
-use Spora\Maker\MakerInterface;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -21,31 +19,21 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * if not already present) using the AbstractTool + #[Tool] attribute pattern from
  * spora-core, ready for the developer to fill in execute() / parameters.
  */
-final class MakeTool extends Command implements MakerInterface
+final class MakeTool extends AbstractMaker
 {
     public function __construct()
     {
-        parent::__construct('make:tool');
-        $this->setDescription('Create a new Tool class under app/Tools/');
-        $this->addArgument(
-            'name',
-            InputArgument::REQUIRED,
+        parent::__construct(
+            'make:tool',
+            'Create a new Tool class under app/Tools/',
             'The tool class basename (without "Tool" suffix).',
         );
-    }
-
-    protected function configure(): void
-    {
-        // Argument added in constructor so new MakeTool()->getDefinition()
-        // has 'name' available without requiring Application::add() to call
-        // configure() first (matters for direct test invocation).
     }
 
     public function generate(InputInterface $input, OutputInterface $output, Generator $generator): void
     {
         $io = new SymfonyStyle($input, $output);
-        $baseName = ucfirst((string) $input->getArgument('name'));
-        $className = str_ends_with($baseName, 'Tool') ? $baseName : $baseName . 'Tool';
+        $className = $this->normalisedClassName($input, 'Tool');
         $snakeName = $this->toSnakeCase($className);
 
         $contents = <<<PHP
@@ -92,8 +80,7 @@ final class MakeTool extends Command implements MakerInterface
 
             PHP;
 
-        $relativePath = 'app/Tools/' . $className . '.php';
-        $generator->generateFile($relativePath, $contents);
+        $generator->generateFile('app/Tools/' . $className . '.php', $contents);
 
         $io->note(sprintf(
             'Don\'t forget to register the tool in app/App.php:\n  public function tools(): array { return [Tools\\%s::class]; }',
@@ -104,12 +91,5 @@ final class MakeTool extends Command implements MakerInterface
     public function getSuccessMessage(): string
     {
         return 'Tool class created. Next: open the file and implement execute().';
-    }
-
-    private function toSnakeCase(string $className): string
-    {
-        $snake = strtolower((string) preg_replace('/(?<!^)([A-Z])/', '_$1', $className));
-        // Strip a leading underscore (from "X" at index 0) if present.
-        return ltrim($snake, '_');
     }
 }

@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Spora\Maker\Maker;
 
+use Spora\Maker\AbstractMaker;
 use Spora\Maker\Generator;
-use Spora\Maker\MakerInterface;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -17,19 +16,15 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  * Use this if you deleted app/App.php and want a fresh reference.
  */
-final class MakeApp extends Command implements MakerInterface
+final class MakeApp extends AbstractMaker
 {
     public function __construct()
     {
-        parent::__construct('make:app');
-        $this->setDescription('Recreate the app/App.php entry-point class.');
-    }
-
-    protected function configure(): void
-    {
-        // Name and description set in constructor so new MakeApp()->getName()
-        // returns 'make:app' without requiring Application::add() to call
-        // configure() first.
+        parent::__construct(
+            'make:app',
+            'Recreate the app/App.php entry-point class.',
+            'Unused — make:app takes no arguments.',
+        );
     }
 
     public function generate(InputInterface $input, OutputInterface $output, Generator $generator): void
