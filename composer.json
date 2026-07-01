@@ -20,6 +20,10 @@
     "autoload-dev": {
         "psr-4": { "Spora\\Maker\\Tests\\": "tests/" }
     },
+    "scripts": {
+        "test": "pest",
+        "test:coverage:clover": "pest --coverage-clover=coverage.xml"
+    },
     "extra": {
         "branch-alias": { "dev-main": "0.1.x-dev" }
     },
