@@ -6,6 +6,7 @@ namespace Spora\Maker\Maker;
 
 use Spora\Maker\AbstractMaker;
 use Spora\Maker\Generator;
+use Spora\Maker\TemplateBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -29,15 +30,7 @@ final class MakeApp extends AbstractMaker
 
     public function generate(InputInterface $input, OutputInterface $output, Generator $generator): void
     {
-        $contents = <<<'PHP'
-            <?php
-
-            declare(strict_types=1);
-
-            namespace App;
-
-            use Spora\Extensions\AbstractExtension;
-
+        $body = <<<'PHP'
             /**
              * Project-level App extension. Discovered by AppLoader via reflection;
              * one per installation, no manifest, no slug.
@@ -58,6 +51,11 @@ final class MakeApp extends AbstractMaker
             }
 
             PHP;
+
+        $contents = (new TemplateBuilder())
+            ->namespace('App')
+            ->use('Spora\\Extensions\\AbstractExtension')
+            ->render($body);
 
         $generator->generateFile('app/App.php', $contents);
     }

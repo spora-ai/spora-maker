@@ -6,6 +6,7 @@ namespace Spora\Maker\Maker;
 
 use Spora\Maker\AbstractMaker;
 use Spora\Maker\Generator;
+use Spora\Maker\TemplateBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -36,18 +37,7 @@ final class MakeTool extends AbstractMaker
         $className = $this->normalisedClassName($input, 'Tool');
         $snakeName = $this->toSnakeCase($className);
 
-        $contents = <<<PHP
-            <?php
-
-            declare(strict_types=1);
-
-            namespace App\\Tools;
-
-            use Spora\\Tools\\AbstractTool;
-            use Spora\\Tools\\Attributes\\Tool;
-            use Spora\\Tools\\Attributes\\ToolParameter;
-            use Spora\\Tools\\ValueObjects\\ToolResult;
-
+        $body = <<<PHP
             #[Tool(
                 name: '{$snakeName}',
                 description: 'TODO: describe what this tool does.',
@@ -79,6 +69,14 @@ final class MakeTool extends AbstractMaker
             }
 
             PHP;
+
+        $contents = (new TemplateBuilder())
+            ->namespace('App\\Tools')
+            ->use('Spora\\Tools\\AbstractTool')
+            ->use('Spora\\Tools\\Attributes\\Tool')
+            ->use('Spora\\Tools\\Attributes\\ToolParameter')
+            ->use('Spora\\Tools\\ValueObjects\\ToolResult')
+            ->render($body);
 
         $generator->generateFile('app/Tools/' . $className . '.php', $contents);
 

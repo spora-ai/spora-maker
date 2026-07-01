@@ -6,6 +6,7 @@ namespace Spora\Maker\Maker;
 
 use Spora\Maker\AbstractMaker;
 use Spora\Maker\Generator;
+use Spora\Maker\TemplateBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -38,17 +39,7 @@ final class MakeController extends AbstractMaker
         $className = $this->normalisedClassName($input, 'Controller');
         $routePath = '/api/v1/' . $this->toKebabCase($className);
 
-        $contents = <<<PHP
-            <?php
-
-            declare(strict_types=1);
-
-            namespace App\\Http\\Controllers;
-
-            use Symfony\\Component\\HttpFoundation\\JsonResponse;
-            use Symfony\\Component\\HttpFoundation\\Request;
-            use Symfony\\Component\\HttpFoundation\\Response;
-
+        $body = <<<PHP
             final class {$className}
             {
                 public function index(Request \$request): Response
@@ -63,10 +54,17 @@ final class MakeController extends AbstractMaker
 
             PHP;
 
+        $contents = (new TemplateBuilder())
+            ->namespace('App\\Http\\Controllers')
+            ->use('Symfony\\Component\\HttpFoundation\\JsonResponse')
+            ->use('Symfony\\Component\\HttpFoundation\\Request')
+            ->use('Symfony\\Component\\HttpFoundation\\Response')
+            ->render($body);
+
         $generator->generateFile('app/Http/Controllers/' . $className . '.php', $contents);
 
         $io->writeln('');
-        $io->writeln('Paste this into <info>app/App.php</info> inside <comment>routes(MiddlewareRouteCollector \$r)</comment>:');
+        $io->writeln('Paste this into <info>app/App.php</info> inside <comment>routes(MiddlewareRouteCollector $r)</comment>:');
         $io->writeln('');
         $io->writeln(<<<SNIPPET
             \$r->addRoute(
