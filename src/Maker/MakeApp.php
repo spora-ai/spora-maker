@@ -6,7 +6,6 @@ namespace Spora\Maker\Maker;
 
 use Spora\Maker\AbstractMaker;
 use Spora\Maker\Generator;
-use Spora\Maker\TemplateBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -42,22 +41,22 @@ final class MakeApp extends AbstractMaker
              * Promote to a plugin later: rename App → Plugin, add plugin.json, ship
              * as a Composer package.
              */
-            final class App extends AbstractExtension
+            public function getName(): string
             {
-                public function getName(): string
-                {
-                    return 'My Spora App';
-                }
+                return 'My Spora App';
             }
 
             PHP;
 
-        $contents = (new TemplateBuilder())
-            ->namespace('App')
-            ->use('Spora\\Extensions\\AbstractExtension')
-            ->render($body);
-
-        $generator->generateFile('app/App.php', $contents);
+        $this->renderClass(
+            namespace: 'App',
+            uses: ['Spora\\Extensions\\AbstractExtension'],
+            className: 'App',
+            parent: 'AbstractExtension',
+            innerBody: $body,
+            targetPath: 'app/App.php',
+            generator: $generator,
+        );
     }
 
     public function getSuccessMessage(): string

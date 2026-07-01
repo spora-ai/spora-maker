@@ -6,7 +6,6 @@ namespace Spora\Maker\Maker;
 
 use Spora\Maker\AbstractMaker;
 use Spora\Maker\Generator;
-use Spora\Maker\TemplateBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -40,28 +39,30 @@ final class MakeController extends AbstractMaker
         $routePath = '/api/v1/' . $this->toKebabCase($className);
 
         $body = <<<PHP
-            final class {$className}
+            public function index(Request \$request): Response
             {
-                public function index(Request \$request): Response
-                {
-                    // TODO: implement.
+                // TODO: implement.
 
-                    return new JsonResponse([
-                        'message' => 'Hello from {$className}!',
-                    ]);
-                }
+                return new JsonResponse([
+                    'message' => 'Hello from {$className}!',
+                ]);
             }
 
             PHP;
 
-        $contents = (new TemplateBuilder())
-            ->namespace('App\\Http\\Controllers')
-            ->use('Symfony\\Component\\HttpFoundation\\JsonResponse')
-            ->use('Symfony\\Component\\HttpFoundation\\Request')
-            ->use('Symfony\\Component\\HttpFoundation\\Response')
-            ->render($body);
-
-        $generator->generateFile('app/Http/Controllers/' . $className . '.php', $contents);
+        $this->renderClass(
+            namespace: 'App\\Http\\Controllers',
+            uses: [
+                'Symfony\\Component\\HttpFoundation\\JsonResponse',
+                'Symfony\\Component\\HttpFoundation\\Request',
+                'Symfony\\Component\\HttpFoundation\\Response',
+            ],
+            className: $className,
+            parent: null,
+            innerBody: $body,
+            targetPath: 'app/Http/Controllers/' . $className . '.php',
+            generator: $generator,
+        );
 
         $io->writeln('');
         $io->writeln('Paste this into <info>app/App.php</info> inside <comment>routes(MiddlewareRouteCollector $r)</comment>:');

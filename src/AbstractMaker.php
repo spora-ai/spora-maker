@@ -17,6 +17,8 @@ use Symfony\Component\Console\Input\InputInterface;
  *  - the configure() no-op stub (kept so subclasses can still extend it)
  *  - the prefix-aware class-name normalisation (so a maker never has to
  *    re-implement str_ends_with + ucfirst by hand)
+ *  - the class-skeleton rendering (so a maker never has to re-implement
+ *    TemplateBuilder + generateFile — it just supplies the body)
  *
  * Subclasses implement {@see MakerInterface::generate()} and
  * {@see MakerInterface::getSuccessMessage()} only — typically each is 5-15
@@ -69,5 +71,46 @@ abstract class AbstractMaker extends Command implements MakerInterface
     {
         $kebab = strtolower((string) preg_replace('/(?<!^)([A-Z])/', '-$1', $className));
         return ltrim($kebab, '-');
+    }
+
+    /**
+     * Render a scaffolded class file and queue it for writing.
+     *
+     * Wraps the four lines SonarQube flagged as duplicated across every
+     * maker: build a {@see TemplateBuilder}, set the namespace + use list,
+     * hand it the inner body (already wrapped by
+     * {@see TemplateBuilder::classTemplate()}), and queue the result with
+     * the {@see Generator}.
+     *
+     * Usage from a maker:
+     *
+     *   $this->renderClass(
+     *       namespace: 'App\\Tools',
+     *       uses: ['Spora\\Tools\\AbstractTool', 'Spora\\Tools\\Attributes\\Tool'],
+     *       className: $className,
+     *       parent: 'AbstractTool',
+     *       innerBody: $body,
+     *       targetPath: 'app/Tools/' . $className . '.php',
+     *       generator: $generator,
+     *   );
+     *
+     * @param list<string> $uses
+     */
+    protected function renderClass(
+        string $namespace,
+        array $uses,
+        string $className,
+        ?string $parent,
+        string $innerBody,
+        string $targetPath,
+        Generator $generator,
+        string $classAttributes = '',
+    ): void {
+        $contents = (new TemplateBuilder())
+            ->namespace($namespace)
+            ->uses($uses)
+            ->render(TemplateBuilder::classTemplate($className, $parent, $innerBody, $classAttributes));
+
+        $generator->generateFile($targetPath, $contents);
     }
 }

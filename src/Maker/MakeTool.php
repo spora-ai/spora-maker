@@ -6,7 +6,6 @@ namespace Spora\Maker\Maker;
 
 use Spora\Maker\AbstractMaker;
 use Spora\Maker\Generator;
-use Spora\Maker\TemplateBuilder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -37,48 +36,55 @@ final class MakeTool extends AbstractMaker
         $className = $this->normalisedClassName($input, 'Tool');
         $snakeName = $this->toSnakeCase($className);
 
-        $body = <<<PHP
+        $classAttributes = <<<PHP
             #[Tool(
                 name: '{$snakeName}',
                 description: 'TODO: describe what this tool does.',
             )]
-            final class {$className} extends AbstractTool
+
+            PHP;
+
+        $body = <<<PHP
+            #[ToolParameter(
+                name: 'query',
+                type: 'string',
+                description: 'TODO: describe this parameter.',
+                required: true,
+            )]
+            private string \$query = '';
+
+            public function execute(array \$arguments, int \$agentId, ?int \$userId = null, ?int \$taskId = null): ToolResult
             {
-                #[ToolParameter(
-                    name: 'query',
-                    type: 'string',
-                    description: 'TODO: describe this parameter.',
-                    required: true,
-                )]
-                private string \$query = '';
+                \$query = (string) (\$arguments['query'] ?? \$this->query);
 
-                public function execute(array \$arguments, int \$agentId, ?int \$userId = null, ?int \$taskId = null): ToolResult
-                {
-                    \$query = (string) (\$arguments['query'] ?? \$this->query);
+                // TODO: implement.
 
-                    // TODO: implement.
+                return ToolResult::ok('Not implemented yet.');
+            }
 
-                    return ToolResult::ok('Not implemented yet.');
-                }
-
-                public function describeAction(array \$arguments): string
-                {
-                    \$query = (string) (\$arguments['query'] ?? '');
-                    return sprintf('Running {$className} with query "%s".', \$query);
-                }
+            public function describeAction(array \$arguments): string
+            {
+                \$query = (string) (\$arguments['query'] ?? '');
+                return sprintf('Running {$className} with query "%s".', \$query);
             }
 
             PHP;
 
-        $contents = (new TemplateBuilder())
-            ->namespace('App\\Tools')
-            ->use('Spora\\Tools\\AbstractTool')
-            ->use('Spora\\Tools\\Attributes\\Tool')
-            ->use('Spora\\Tools\\Attributes\\ToolParameter')
-            ->use('Spora\\Tools\\ValueObjects\\ToolResult')
-            ->render($body);
-
-        $generator->generateFile('app/Tools/' . $className . '.php', $contents);
+        $this->renderClass(
+            namespace: 'App\\Tools',
+            uses: [
+                'Spora\\Tools\\AbstractTool',
+                'Spora\\Tools\\Attributes\\Tool',
+                'Spora\\Tools\\Attributes\\ToolParameter',
+                'Spora\\Tools\\ValueObjects\\ToolResult',
+            ],
+            className: $className,
+            parent: 'AbstractTool',
+            innerBody: $body,
+            targetPath: 'app/Tools/' . $className . '.php',
+            generator: $generator,
+            classAttributes: $classAttributes,
+        );
 
         $io->note(sprintf(
             'Don\'t forget to register the tool in app/App.php:\n  public function tools(): array { return [Tools\\%s::class]; }',
