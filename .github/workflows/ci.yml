@@ -109,15 +109,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: coverage-clover
-          path: coverage.xml
+          path: artifacts
 
       - name: Run SonarCloud scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ ! -f coverage.xml ]; then
-            echo "::error::coverage.xml not found — php-test job may have failed"
+          if [ ! -f artifacts/coverage.xml ]; then
+            echo "::error::coverage.xml not found in artifacts/ — php-test job may have failed"
+            ls -la artifacts/ || true
             exit 1
           fi
           sonar-scanner \
@@ -125,5 +126,5 @@ jobs:
             -Dsonar.organization=spora-ai \
             -Dsonar.sources=src \
             -Dsonar.tests=tests \
-            -Dsonar.php.coverage.reportPaths=coverage.xml \
+            -Dsonar.php.coverage.reportPaths=artifacts/coverage.xml \
             -Dsonar.projectVersion=${GITHUB_SHA::7}
