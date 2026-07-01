@@ -135,7 +135,7 @@ jobs:
             exit 1
           fi
           sonar-scanner \
-            -Dsonar.projectKey=spora-ai_SporaMaker \
+            -Dsonar.projectKey=spora-ai_spora-maker \
             -Dsonar.organization=spora-ai \
             -Dsonar.sources=src \
             -Dsonar.tests=tests \
