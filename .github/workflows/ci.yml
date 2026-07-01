@@ -84,19 +84,19 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
 
       - name: Setup PHP 8.4
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           php-version: '8.4'
           coverage: xdebug
           tools: composer
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: vendor
           key: ${{ runner.os }}-php8.4-${{ hashFiles('composer.json') }}
@@ -106,10 +106,23 @@ jobs:
         run: composer install --no-interaction --prefer-dist
 
       - name: Download coverage artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: coverage-clover
           path: artifacts
+
+      # sonar-scanner CLI is not pre-installed on the runner.
+      # Pin via SHA-aligned download so the workflow doesn't depend on an
+      # extra third-party action (SonarCloud rule S7637).
+      - name: Install sonar-scanner
+        run: |
+          set -e
+          SCANNER_VERSION=6.2.1.4610
+          curl -fsSL \
+            "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SCANNER_VERSION}-linux-x64.zip" \
+            -o /tmp/sonar-scanner.zip
+          unzip -q /tmp/sonar-scanner.zip -d /opt
+          echo "/opt/sonar-scanner-${SCANNER_VERSION}-linux-x64/bin" >> "$GITHUB_PATH"
 
       - name: Run SonarCloud scan
         env:
