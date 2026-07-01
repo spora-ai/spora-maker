@@ -2,28 +2,6 @@
 
 declare(strict_types=1);
 
-use Spora\Maker\FileManager;
-
-beforeEach(function (): void {
-    $this->tmpDir = sys_get_temp_dir() . '/spora-maker-' . bin2hex(random_bytes(4));
-    mkdir($this->tmpDir, 0755, true);
-    $this->fm = new FileManager($this->tmpDir);
-});
-
-afterEach(function (): void {
-    if (is_dir($this->tmpDir)) {
-        // Best-effort recursive cleanup. Use a small helper to avoid dep on a rm library.
-        $rii = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($this->tmpDir, FilesystemIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::CHILD_FIRST,
-        );
-        foreach ($rii as $file) {
-            $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
-        }
-        rmdir($this->tmpDir);
-    }
-});
-
 it('returns absolute paths with leading slash stripped', function (): void {
     expect($this->fm->absolutePath('app/Tools/Foo.php'))->toBe($this->tmpDir . '/app/Tools/Foo.php');
     expect($this->fm->absolutePath('/app/Tools/Foo.php'))->toBe($this->tmpDir . '/app/Tools/Foo.php');

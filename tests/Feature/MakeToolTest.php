@@ -2,28 +2,7 @@
 
 declare(strict_types=1);
 
-use Spora\Maker\FileManager;
-use Spora\Maker\Generator;
 use Spora\Maker\Maker\MakeTool;
-
-beforeEach(function (): void {
-    $this->tmpDir = sys_get_temp_dir() . '/spora-maker-' . bin2hex(random_bytes(4));
-    mkdir($this->tmpDir, 0755, true);
-    $this->generator = new Generator(new FileManager($this->tmpDir));
-});
-
-afterEach(function (): void {
-    if (is_dir($this->tmpDir)) {
-        $rii = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($this->tmpDir, FilesystemIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::CHILD_FIRST,
-        );
-        foreach ($rii as $file) {
-            $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
-        }
-        rmdir($this->tmpDir);
-    }
-});
 
 it('creates app/Tools/<Name>Tool.php with the Tool attribute', function (): void {
     generateInto(new MakeTool(), ['name' => 'WebSearch'], $this->generator);
