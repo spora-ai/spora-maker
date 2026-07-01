@@ -21,14 +21,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 final class MakeTool extends AbstractMaker
 {
-    public function __construct()
-    {
-        parent::__construct(
-            'make:tool',
-            'Create a new Tool class under app/Tools/',
-            'The tool class basename (without "Tool" suffix).',
-        );
-    }
+    protected const COMMAND_NAME = 'make:tool';
+    protected const COMMAND_DESCRIPTION = 'Create a new Tool class under app/Tools/';
+    protected const COMMAND_ARG_HELP = 'The tool class basename (without "Tool" suffix).';
 
     public function generate(InputInterface $input, OutputInterface $output, Generator $generator): void
     {

@@ -11,31 +11,26 @@ use Symfony\Component\Console\Input\InputInterface;
 /**
  * Common base for every `make:*` command.
  *
- * Centralises the things every maker does the same way:
- *  - name + description + the "name" argument set in the constructor
- *    (so new MakeTool()->getName() works without Application::add())
- *  - the configure() no-op stub (kept so subclasses can still extend it)
- *  - the prefix-aware class-name normalisation (so a maker never has to
- *    re-implement str_ends_with + ucfirst by hand)
- *  - the class-skeleton rendering (so a maker never has to re-implement
- *    TemplateBuilder + generateFile — it just supplies the body)
+ * Subclasses declare their command name, description, and argument help via
+ * the `COMMAND_*` class constants. The base constructor wires those into a
+ * {@see Command} and the `name` argument; subclasses don't repeat the
+ * 5-line constructor pattern.
  *
  * Subclasses implement {@see MakerInterface::generate()} and
- * {@see MakerInterface::getSuccessMessage()} only — typically each is 5-15
- * lines of scaffold-specific code.
+ * {@see MakerInterface::getSuccessMessage()} — typically each is 5-15 lines
+ * of scaffold-specific code.
  */
 abstract class AbstractMaker extends Command implements MakerInterface
 {
-    /**
-     * @param string $commandName  e.g. 'make:tool'
-     * @param string $description  Short summary for `bin/spora list`
-     * @param string $argNameHelp  Help text for the `name` argument
-     */
-    public function __construct(string $commandName, string $description, string $argNameHelp)
+    protected const COMMAND_NAME = '';
+    protected const COMMAND_DESCRIPTION = '';
+    protected const COMMAND_ARG_HELP = '';
+
+    public function __construct()
     {
-        parent::__construct($commandName);
-        $this->setDescription($description);
-        $this->addArgument('name', InputArgument::REQUIRED, $argNameHelp);
+        parent::__construct(static::COMMAND_NAME);
+        $this->setDescription(static::COMMAND_DESCRIPTION);
+        $this->addArgument('name', InputArgument::REQUIRED, static::COMMAND_ARG_HELP);
     }
 
     protected function configure(): void
@@ -75,24 +70,6 @@ abstract class AbstractMaker extends Command implements MakerInterface
 
     /**
      * Render a scaffolded class file and queue it for writing.
-     *
-     * Wraps the four lines SonarQube flagged as duplicated across every
-     * maker: build a {@see TemplateBuilder}, set the namespace + use list,
-     * hand it the inner body (already wrapped by
-     * {@see TemplateBuilder::classTemplate()}), and queue the result with
-     * the {@see Generator}.
-     *
-     * Usage from a maker:
-     *
-     *   $this->renderClass(
-     *       namespace: 'App\\Tools',
-     *       uses: ['Spora\\Tools\\AbstractTool', 'Spora\\Tools\\Attributes\\Tool'],
-     *       className: $className,
-     *       parent: 'AbstractTool',
-     *       innerBody: $body,
-     *       targetPath: 'app/Tools/' . $className . '.php',
-     *       generator: $generator,
-     *   );
      *
      * @param list<string> $uses
      */

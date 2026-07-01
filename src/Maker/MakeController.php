@@ -23,14 +23,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 final class MakeController extends AbstractMaker
 {
-    public function __construct()
-    {
-        parent::__construct(
-            'make:controller',
-            'Create a new HTTP controller under app/Http/Controllers/',
-            'The controller basename (e.g. "MyApi" → MyApiController).',
-        );
-    }
+    protected const COMMAND_NAME = 'make:controller';
+    protected const COMMAND_DESCRIPTION = 'Create a new HTTP controller under app/Http/Controllers/';
+    protected const COMMAND_ARG_HELP = 'The controller basename (e.g. "MyApi" → MyApiController).';
 
     public function generate(InputInterface $input, OutputInterface $output, Generator $generator): void
     {

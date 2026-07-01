@@ -29,7 +29,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 final class MakeCommand extends Command
 {
-    /** @var list<class-string<Command>> */
+    /** @var list<class-string<AbstractMaker>> */
     private const MAKERS = [
         MakeTool::class,
         MakeController::class,
@@ -63,7 +63,6 @@ final class MakeCommand extends Command
 
         $rows = [];
         foreach (self::MAKERS as $makerClass) {
-            /** @var Command $cmd */
             $cmd = new $makerClass();
             $rows[] = [$cmd->getName(), $cmd->getDescription()];
         }
@@ -86,7 +85,6 @@ final class MakeCommand extends Command
 
         $makers = [];
         foreach (self::MAKERS as $makerClass) {
-            /** @var Command&MakerInterface $maker */
             $maker = new $makerClass();
             // Wire the shared Generator into the command by re-creating it
             // with a closure that injects on each `execute()`. We achieve this

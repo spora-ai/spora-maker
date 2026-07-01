@@ -18,14 +18,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class MakeApp extends AbstractMaker
 {
-    public function __construct()
-    {
-        parent::__construct(
-            'make:app',
-            'Recreate the app/App.php entry-point class.',
-            'Unused — make:app takes no arguments.',
-        );
-    }
+    protected const COMMAND_NAME = 'make:app';
+    protected const COMMAND_DESCRIPTION = 'Recreate the app/App.php entry-point class.';
+    protected const COMMAND_ARG_HELP = 'Unused — make:app takes no arguments.';
 
     public function generate(InputInterface $input, OutputInterface $output, Generator $generator): void
     {
