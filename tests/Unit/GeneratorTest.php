@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use Spora\Maker\Exception\DuplicateQueuedFileException;
+use Spora\Maker\Exception\FileAlreadyExistsException;
+
 it('starts with no pending files', function (): void {
     expect($this->generator->getPendingFiles())->toBe([]);
 });
@@ -35,7 +38,7 @@ it('refuses to queue the same relative path twice', function (): void {
     $this->generator->generateFile('app/A.php', '<?php // a');
 
     expect(fn () => $this->generator->generateFile('app/A.php', '<?php // b'))
-        ->toThrow(RuntimeException::class);
+        ->toThrow(DuplicateQueuedFileException::class);
 });
 
 it('refuses to write to an existing file (delegated to FileManager)', function (): void {
@@ -45,5 +48,5 @@ it('refuses to write to an existing file (delegated to FileManager)', function (
     $this->generator->generateFile('app/A.php', '<?php // new');
 
     expect(fn () => $this->generator->writeChanges())
-        ->toThrow(RuntimeException::class);
+        ->toThrow(FileAlreadyExistsException::class);
 });

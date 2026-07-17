@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Spora\Maker\Exception\FileAlreadyExistsException;
 use Spora\Maker\Maker\MakeApp;
 
 it('creates app/App.php with the AbstractExtension scaffold', function (): void {
@@ -30,7 +31,7 @@ it('refuses to overwrite an existing app/App.php', function (): void {
 
     generateInto(new MakeApp(), [], $this->generator);
 
-    expect(fn () => $this->generator->writeChanges())->toThrow(RuntimeException::class);
+    expect(fn () => $this->generator->writeChanges())->toThrow(FileAlreadyExistsException::class);
 });
 
 it('registers the command as make:app', function (): void {

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Spora\Maker\Exception\FileAlreadyExistsException;
+
 it('returns absolute paths with leading slash stripped', function (): void {
     expect($this->fm->absolutePath('app/Tools/Foo.php'))->toBe($this->tmpDir . '/app/Tools/Foo.php');
     expect($this->fm->absolutePath('/app/Tools/Foo.php'))->toBe($this->tmpDir . '/app/Tools/Foo.php');
@@ -33,7 +35,7 @@ it('refuses to overwrite an existing file', function (): void {
     $this->fm->dumpFile('app/Foo.php', '<?php // first');
 
     expect(fn () => $this->fm->dumpFile('app/Foo.php', '<?php // second'))
-        ->toThrow(RuntimeException::class);
+        ->toThrow(FileAlreadyExistsException::class);
 });
 
 it('creates parent directories automatically when dumping', function (): void {
