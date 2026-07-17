@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Spora\Maker\Exception\FileAlreadyExistsException;
 use Spora\Maker\Maker\MakeTool;
 
 it('creates app/Tools/<Name>Tool.php with the Tool attribute', function (): void {
@@ -35,7 +36,7 @@ it('refuses to overwrite an existing tool file', function (): void {
 
     generateInto(new MakeTool(), ['name' => 'WebSearch'], $this->generator);
 
-    expect(fn () => $this->generator->writeChanges())->toThrow(RuntimeException::class);
+    expect(fn () => $this->generator->writeChanges())->toThrow(FileAlreadyExistsException::class);
 });
 
 it('registers the command as make:tool', function (): void {

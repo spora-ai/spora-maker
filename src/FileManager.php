@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Spora\Maker;
 
-use RuntimeException;
+use Spora\Maker\Exception\FileAlreadyExistsException;
 
 /**
  * Filesystem safety net for the scaffolder.
  *
- * - Refuses to overwrite an existing file (raises RuntimeException).
+ * - Refuses to overwrite an existing file (throws FileAlreadyExistsException).
  * - Creates intermediate directories lazily.
  * - Centralises path resolution so templates stay path-agnostic.
  *
@@ -50,7 +50,7 @@ final class FileManager
     {
         $abs = $this->absolutePath($relativePath);
         if (is_file($abs)) {
-            throw new RuntimeException(sprintf(
+            throw new FileAlreadyExistsException(sprintf(
                 'The file "%s" cannot be generated because it already exists. '
                 . 'Delete it first or pick a different name.',
                 $relativePath,

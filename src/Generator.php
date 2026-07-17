@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spora\Maker;
 
-use RuntimeException;
+use Spora\Maker\Exception\DuplicateQueuedFileException;
 
 /**
  * Queues file-emission operations and flushes them in one pass.
@@ -33,7 +33,7 @@ final class Generator
     public function generateFile(string $relativePath, string $contents): string
     {
         if (isset($this->pending[$relativePath])) {
-            throw new RuntimeException(sprintf(
+            throw new DuplicateQueuedFileException(sprintf(
                 'File "%s" was queued twice by the same maker.',
                 $relativePath,
             ));
