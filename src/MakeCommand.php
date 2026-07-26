@@ -6,6 +6,7 @@ namespace Spora\Maker;
 
 use Spora\Maker\Maker\MakeApp;
 use Spora\Maker\Maker\MakeController;
+use Spora\Maker\Maker\MakeSkill;
 use Spora\Maker\Maker\MakeTool;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -33,6 +34,7 @@ final class MakeCommand extends Command
     private const MAKERS = [
         MakeTool::class,
         MakeController::class,
+        MakeSkill::class,
         MakeApp::class,
     ];
 
@@ -50,6 +52,7 @@ final class MakeCommand extends Command
                 Available subcommands:
                   make:tool <Name>        Create app/Tools/<Name>Tool.php
                   make:controller <Name>  Create app/Http/Controllers/<Name>Controller.php
+                  make:skill <Name>       Create skills/<Name>/SKILL.md + examples.md
                   make:app                Recreate app/App.php
 
                 Run any subcommand directly with `php bin/spora make:tool Foo`.
