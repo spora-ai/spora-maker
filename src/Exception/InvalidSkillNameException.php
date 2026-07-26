@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Spora\Maker\Exception;
 
-use InvalidArgumentException;
+use RuntimeException;
 
 /**
  * Thrown by {@see \Spora\Maker\Maker\MakeSkill::generate()} when the
  * supplied skill slug does not match the agentskills.io name pattern.
- * Surfaces as an InvalidArgumentException to callers so the
- * MakerRunner can render it as a user-facing CLI error.
+ * Extends RuntimeException so {@see \Spora\Maker\MakerRunner} renders
+ * it as a user-facing CLI error instead of an uncaught stack trace.
  */
-final class InvalidSkillNameException extends InvalidArgumentException
+final class InvalidSkillNameException extends RuntimeException
 {
     public static function forName(string $name): self
     {

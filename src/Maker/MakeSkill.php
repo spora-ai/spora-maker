@@ -18,7 +18,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  *
  * Creates skills/git/SKILL.md (entry point with frontmatter + body stub) and
  * skills/git/examples.md (optional sidecar). The slug must match the
- * agentskills.io name pattern enforced by {@see \Spora\Core\Skills\SkillValidator}:
+ * agentskills.io name pattern enforced by {@see \Spora\Skills\SkillValidator}:
  * lowercase alphanumeric + hyphens, no leading/trailing hyphen, no `--`,
  * 1-64 chars, and the directory name must equal the frontmatter `name`.
  */
@@ -29,7 +29,7 @@ final class MakeSkill extends AbstractMaker
     protected const COMMAND_ARG_HELP = 'The skill slug (lowercase, alphanumeric + hyphens, 1-64 chars).';
 
     /**
-     * Mirrors {@see \Spora\Core\Skills\SkillValidator::NAME_PATTERN}. Duplicated
+     * Mirrors {@see \Spora\Skills\SkillValidator::NAME_PATTERN}. Duplicated
      * here so spora-maker stays self-contained and doesn't depend on
      * spora-core at runtime — the scaffolder runs against a project, not
      * inside one.
