@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Spora\Maker\Exception\FileAlreadyExistsException;
+use Spora\Maker\Exception\InvalidSkillNameException;
 use Spora\Maker\Maker\MakeSkill;
 
 it('creates skills/<name>/SKILL.md and examples.md', function (): void {
@@ -30,18 +31,18 @@ it('writes a SKILL.md with valid frontmatter matching the slug', function (): vo
 
 it('rejects slugs with consecutive hyphens', function (): void {
     expect(fn () => generateInto(new MakeSkill(), ['name' => 'BAD--NAME'], $this->generator))
-        ->toThrow(RuntimeException::class, 'not a valid agentskills.io slug');
+        ->toThrow(InvalidSkillNameException::class, 'not a valid agentskills.io slug');
 });
 
 it('rejects slugs with uppercase letters', function (): void {
     expect(fn () => generateInto(new MakeSkill(), ['name' => 'GitHelper'], $this->generator))
-        ->toThrow(RuntimeException::class, 'not a valid agentskills.io slug');
+        ->toThrow(InvalidSkillNameException::class, 'not a valid agentskills.io slug');
 });
 
 it('rejects slugs that are too long', function (): void {
     $tooLong = str_repeat('a', 65);
     expect(fn () => generateInto(new MakeSkill(), ['name' => $tooLong], $this->generator))
-        ->toThrow(RuntimeException::class, 'not a valid agentskills.io slug');
+        ->toThrow(InvalidSkillNameException::class, 'not a valid agentskills.io slug');
 });
 
 it('refuses to overwrite an existing skill directory', function (): void {

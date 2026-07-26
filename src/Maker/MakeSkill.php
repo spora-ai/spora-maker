@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spora\Maker\Maker;
 
 use Spora\Maker\AbstractMaker;
+use Spora\Maker\Exception\InvalidSkillNameException;
 use Spora\Maker\Generator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -41,11 +42,7 @@ final class MakeSkill extends AbstractMaker
         $name = (string) $input->getArgument('name');
 
         if (preg_match(self::NAME_PATTERN, $name) !== 1) {
-            throw new \RuntimeException(sprintf(
-                'Skill name "%s" is not a valid agentskills.io slug. '
-                . 'Use 1-64 lowercase alphanumeric chars and hyphens, no leading/trailing hyphen, no consecutive hyphens.',
-                $name,
-            ));
+            throw InvalidSkillNameException::forName($name);
         }
 
         $generator->generateFile(
@@ -54,7 +51,7 @@ final class MakeSkill extends AbstractMaker
         );
         $generator->generateFile(
             'skills/' . $name . '/examples.md',
-            $this->examplesTemplate($name),
+            $this->examplesTemplate(),
         );
 
         $io->note(sprintf(
@@ -94,7 +91,7 @@ final class MakeSkill extends AbstractMaker
             YAML;
     }
 
-    private function examplesTemplate(string $name): string
+    private function examplesTemplate(): string
     {
         return <<<MD
             # Examples
