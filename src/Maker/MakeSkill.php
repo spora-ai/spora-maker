@@ -78,7 +78,7 @@ final class MakeSkill extends AbstractMaker
 
             # TODO: skill title
 
-            TODO: write the body. The Agent reads this when it calls skill_read on SKILL.md.
+            TODO: write the body. The Agent reads this when it calls `skill(action: "read", name: "<your-skill-slug>", filename: "SKILL.md")`.
 
             ## When to use this skill
 
