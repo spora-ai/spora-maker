@@ -12,7 +12,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * Scaffolds an HTTP controller class under `app/Http/Controllers/<Name>Controller.php`
- * and prints the route-registration snippet the developer pastes into App::routes().
+ * and prints the RoutesRegisteringEvent subscriber the developer pastes into App.
  *
  *   php bin/spora make:controller MyApi
  *
@@ -60,15 +60,18 @@ final class MakeController extends AbstractMaker
         );
 
         $io->writeln('');
-        $io->writeln('Paste this into <info>app/App.php</info> inside <comment>routes(MiddlewareRouteCollector $r)</comment>:');
+        $io->writeln('Add a <comment>RoutesRegisteringEvent</comment> subscriber to <info>app/App.php</info>. The App receives the event only if it implements <comment>EventSubscriberInterface</comment> and lists the method in <comment>getSubscribedEvents()</comment>:');
         $io->writeln('');
         $io->writeln(<<<SNIPPET
-            \$r->addRoute(
-                'GET',
-                '{$routePath}',
-                [\\App\\Http\\Controllers\\{$className}::class, 'index'],
-                [\\Spora\\Http\\Middleware\\AuthMiddleware::class, \\Spora\\Http\\Middleware\\CsrfMiddleware::class],
-            );
+            public function onRoutesRegistering(RoutesRegisteringEvent \$event): void
+            {
+                \$event->routes()->addRoute(
+                    'GET',
+                    '{$routePath}',
+                    [\\App\\Http\\Controllers\\{$className}::class, 'index'],
+                    [\\Spora\\Http\\Middleware\\AuthMiddleware::class, \\Spora\\Http\\Middleware\\CsrfMiddleware::class],
+                );
+            }
             SNIPPET);
     }
 

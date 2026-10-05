@@ -25,6 +25,24 @@ it('creates app/App.php with the AbstractExtension scaffold', function (): void 
     expect($contents)->not->toContain('// public function boot(): void');
 });
 
+it('names no hook that was removed in 1.0', function (): void {
+    generateInto(new MakeApp(), [], $this->generator);
+    $this->generator->writeChanges();
+
+    $docblock = file_get_contents($this->tmpDir . '/app/App.php');
+
+    expect($docblock)
+        ->toContain('EventSubscriberInterface')
+        ->toContain('RoutesRegisteringEvent')
+        // Five of these were removed in 1.0. A scaffold that names them
+        // sends every new install looking for methods that do not exist.
+        ->not->toContain('drivers()')
+        ->not->toContain('recipePaths()')
+        ->not->toContain('register(\\DI\\ContainerBuilder)')
+        ->not->toContain('routes()')
+        ->not->toContain('boot()');
+});
+
 it('refuses to overwrite an existing app/App.php', function (): void {
     mkdir($this->tmpDir . '/app', 0755, true);
     file_put_contents($this->tmpDir . '/app/App.php', '<?php // existing');
