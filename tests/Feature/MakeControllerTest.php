@@ -28,6 +28,19 @@ it('does not double-append the Controller suffix when already present', function
     expect(file_exists($this->tmpDir . '/app/Http/Controllers/WidgetControllerController.php'))->toBeFalse();
 });
 
+it('prints a RoutesRegisteringEvent subscriber, not the hook removed in 1.0', function (): void {
+    $output = generateInto(new MakeController(), ['name' => 'MyApi'], $this->generator);
+
+    expect($output)
+        ->toContain('onRoutesRegistering')
+        ->toContain('RoutesRegisteringEvent')
+        ->toContain('EventSubscriberInterface')
+        ->toContain('/api/v1/my-api')
+        // routes() was replaced by the event; printing it sends developers
+        // to a method that no longer exists on the extension contract.
+        ->not->toContain('routes(MiddlewareRouteCollector');
+});
+
 it('registers the command as make:controller', function (): void {
     $cmd = new MakeController();
     expect($cmd->getName())->toBe('make:controller');
