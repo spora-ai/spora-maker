@@ -43,3 +43,39 @@ it('registers the command as make:tool', function (): void {
     $cmd = new MakeTool();
     expect($cmd->getName())->toBe('make:tool');
 });
+
+/*
+ * Regression guard for the v0.30.0 signature break. A scaffolded tool whose
+ * execute() diverges from Spora\Tools\ToolInterface::execute() fatals at
+ * CLASS-LOAD, so the operator only discovers it when the agent tries to call
+ * the tool. Assert the exact signature and its import so a future core change
+ * cannot silently ship a fatal scaffold again.
+ */
+it('scaffolds execute() with the v0.30 four-parameter signature', function (): void {
+    generateInto(new MakeTool(), ['name' => 'WebSearch'], $this->generator);
+
+    $this->generator->writeChanges();
+    $contents = file_get_contents($this->tmpDir . '/app/Tools/WebSearchTool.php');
+
+    expect($contents)->toContain(
+        'public function execute(array $arguments, int $agentId, ?int $taskId = null, ?PrincipalContext $context = null): ToolResult'
+    );
+});
+
+it('imports PrincipalContext so the scaffolded type hint resolves', function (): void {
+    generateInto(new MakeTool(), ['name' => 'WebSearch'], $this->generator);
+
+    $this->generator->writeChanges();
+    $contents = file_get_contents($this->tmpDir . '/app/Tools/WebSearchTool.php');
+
+    expect($contents)->toContain('use Spora\Services\PrincipalContext;');
+});
+
+it('never scaffolds the removed ?int $userId parameter', function (): void {
+    generateInto(new MakeTool(), ['name' => 'WebSearch'], $this->generator);
+
+    $this->generator->writeChanges();
+    $contents = file_get_contents($this->tmpDir . '/app/Tools/WebSearchTool.php');
+
+    expect($contents)->not->toContain('$userId');
+});
