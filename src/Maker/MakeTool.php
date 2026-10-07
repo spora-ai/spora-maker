@@ -18,6 +18,15 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * Creates app/Tools/WebSearchTool.php (the "Tool" suffix is appended automatically
  * if not already present) using the AbstractTool + #[Tool] attribute pattern from
  * spora-core, ready for the developer to fill in execute() / parameters.
+ *
+ * The scaffolded `execute()` must match `Spora\Tools\ToolInterface::execute()`
+ * **exactly**. PHP fatals at class-load — not at call time — when a concrete
+ * method's signature diverges from the interface it implements, so a scaffold
+ * that is merely "close" is as fatal as one that is far off. As of spora-core
+ * v0.30.0 that signature is the four-parameter form below: the legacy
+ * `?int $userId` third parameter is gone, and `?PrincipalContext $context`
+ * moved into fourth position. Keep the `Spora\Services\PrincipalContext`
+ * import in the `uses` list in lockstep with this signature.
  */
 final class MakeTool extends AbstractMaker
 {
@@ -48,7 +57,7 @@ final class MakeTool extends AbstractMaker
             )]
             private string \$query = '';
 
-            public function execute(array \$arguments, int \$agentId, ?int \$userId = null, ?int \$taskId = null): ToolResult
+            public function execute(array \$arguments, int \$agentId, ?int \$taskId = null, ?PrincipalContext \$context = null): ToolResult
             {
                 \$query = (string) (\$arguments['query'] ?? \$this->query);
 
@@ -68,6 +77,7 @@ final class MakeTool extends AbstractMaker
         $this->renderClass(
             namespace: 'App\\Tools',
             uses: [
+                'Spora\\Services\\PrincipalContext',
                 'Spora\\Tools\\AbstractTool',
                 'Spora\\Tools\\Attributes\\Tool',
                 'Spora\\Tools\\Attributes\\ToolParameter',
