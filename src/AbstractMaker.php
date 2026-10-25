@@ -60,7 +60,7 @@ abstract class AbstractMaker extends Command implements MakerInterface
     }
 
     /**
-     * "MyApiController" → "my-api". Lifted out of MakeController.
+     * "MyApiController" → "my-api-controller". Lifted out of MakeController.
      */
     protected function toKebabCase(string $className): string
     {

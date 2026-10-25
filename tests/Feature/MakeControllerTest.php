@@ -35,7 +35,10 @@ it('prints a RoutesRegisteringEvent subscriber, not the hook removed in 1.0', fu
         ->toContain('onRoutesRegistering')
         ->toContain('RoutesRegisteringEvent')
         ->toContain('EventSubscriberInterface')
-        ->toContain('/api/v1/my-api')
+        // The exact path, not a substring: '/api/v1/my-api' is also a prefix of
+        // '/api/v1/my-api-controller', so the old assertion passed for a route
+        // that named the PHP class instead of the resource.
+        ->toContain("'/api/v1/my-api',")
         // routes() was replaced by the event; printing it sends developers
         // to a method that no longer exists on the extension contract.
         ->not->toContain('routes(MiddlewareRouteCollector');

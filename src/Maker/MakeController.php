@@ -41,7 +41,13 @@ final class MakeController extends AbstractMaker
     {
         $io = new SymfonyStyle($input, $output);
         $className = $this->normalisedClassName($input, 'Controller');
-        $routePath = '/api/v1/' . $this->toKebabCase($className);
+        // The route names the resource, not the PHP class: `MyApiController`
+        // is reachable at `/api/v1/my-api`. The suffix belongs to the file
+        // name, not to the URL.
+        $routeSlug = str_ends_with($className, 'Controller')
+            ? substr($className, 0, -strlen('Controller'))
+            : $className;
+        $routePath = '/api/v1/' . $this->toKebabCase($routeSlug);
 
         $body = <<<PHP
             public function index(Request \$request): Response
