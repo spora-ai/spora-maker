@@ -20,6 +20,16 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * response, ready to be filled in. Routes are registered imperatively
  * (RouteDefinitions-style) rather than via attributes, so the route snippet
  * is printed for the developer to paste.
+ *
+ * The printed snippet is the whole App class — use statements, the
+ * `EventSubscriberInterface` implementation, `getSubscribedEvents()` and the
+ * handler — because the App is only wired to the event dispatcher when it
+ * implements the subscriber interface. A bare handler body would leave the
+ * operator assembling the class that makes the route live.
+ *
+ * `getName()` is part of the printed class because `AbstractExtension` leaves
+ * it abstract: the snippet has to stay a class PHP can load, not a fragment
+ * that only works when merged into an existing app/App.php.
  */
 final class MakeController extends AbstractMaker
 {
@@ -60,23 +70,49 @@ final class MakeController extends AbstractMaker
         );
 
         $io->writeln('');
-        $io->writeln('Add a <comment>RoutesRegisteringEvent</comment> subscriber to <info>app/App.php</info>. The App receives the event only if it implements <comment>EventSubscriberInterface</comment> and lists the method in <comment>getSubscribedEvents()</comment>:');
+        $io->writeln('Add a <comment>RoutesRegisteringEvent</comment> subscriber to <info>app/App.php</info>. The App receives the event only if it implements <comment>EventSubscriberInterface</comment> and lists the method in <comment>getSubscribedEvents()</comment>. The class below is complete and compiles as written — merge it into <info>app/App.php</info>: copy the <info>use</info> statements, add <comment>implements EventSubscriberInterface</comment> to the class declaration, and add the members, keeping your own <info>getName()</info> value and the hooks your project already overrides.');
         $io->writeln('');
         $io->writeln(<<<SNIPPET
-            public function onRoutesRegistering(RoutesRegisteringEvent \$event): void
+            <?php
+
+            declare(strict_types=1);
+
+            namespace App;
+
+            use Spora\\Events\\RoutesRegisteringEvent;
+            use Spora\\Extensions\\AbstractExtension;
+            use Spora\\Http\\Middleware\\AuthMiddleware;
+            use Spora\\Http\\Middleware\\CsrfMiddleware;
+            use Symfony\\Component\\EventDispatcher\\EventSubscriberInterface;
+
+            final class App extends AbstractExtension implements EventSubscriberInterface
             {
-                \$event->routes()->addRoute(
-                    'GET',
-                    '{$routePath}',
-                    [\\App\\Http\\Controllers\\{$className}::class, 'index'],
-                    [\\Spora\\Http\\Middleware\\AuthMiddleware::class, \\Spora\\Http\\Middleware\\CsrfMiddleware::class],
-                );
+                public function getName(): string
+                {
+                    return 'My Spora App';
+                }
+
+                /** @return array<class-string, string> */
+                public static function getSubscribedEvents(): array
+                {
+                    return [RoutesRegisteringEvent::class => 'onRoutesRegistering'];
+                }
+
+                public function onRoutesRegistering(RoutesRegisteringEvent \$event): void
+                {
+                    \$event->routes()->addRoute(
+                        'GET',
+                        '{$routePath}',
+                        [\\App\\Http\\Controllers\\{$className}::class, 'index'],
+                        [AuthMiddleware::class, CsrfMiddleware::class],
+                    );
+                }
             }
             SNIPPET);
     }
 
     public function getSuccessMessage(): string
     {
-        return 'Controller class created. Next: add route wiring to app/App.php.';
+        return 'Controller class created. Next: merge the printed subscriber into app/App.php.';
     }
 }
