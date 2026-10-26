@@ -35,9 +35,9 @@ it('prints a RoutesRegisteringEvent subscriber, not the hook removed in 1.0', fu
         ->toContain('onRoutesRegistering')
         ->toContain('RoutesRegisteringEvent')
         ->toContain('EventSubscriberInterface')
-        // The exact path, not a substring: '/api/v1/my-api' is also a prefix of
-        // '/api/v1/my-api-controller', so the old assertion passed for a route
-        // that named the PHP class instead of the resource.
+        // The exact path, not a substring: '/api/v1/my-api' is also a prefix
+        // of '/api/v1/my-api-controller', so the old assertion passed for a
+        // route that named the PHP class instead of the resource.
         ->toContain("'/api/v1/my-api',")
         // routes() was replaced by the event; printing it sends developers
         // to a method that no longer exists on the extension contract.
@@ -46,10 +46,10 @@ it('prints a RoutesRegisteringEvent subscriber, not the hook removed in 1.0', fu
 
 /*
  * The App is only attached to the event dispatcher when it implements
- * EventSubscriberInterface (AppLoader::wireEventSubscribers). A printed
- * handler body without the interface, the subscriber map and the imports
- * leaves the operator assembling the class that makes the route live — and
- * the body does not compile in the file it is pasted into.
+ * EventSubscriberInterface (AppLoader::wireEventSubscribers), so the
+ * printed class has to carry the interface, the subscriber map, the
+ * imports and `getName()` — a handler body alone does not compile in the
+ * file it is pasted into.
  */
 it('prints the complete App class the subscriber needs', function (): void {
     $output = generateInto(new MakeController(), ['name' => 'MyApi'], $this->generator);

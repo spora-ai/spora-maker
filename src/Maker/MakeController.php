@@ -22,14 +22,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * is printed for the developer to paste.
  *
  * The printed snippet is the whole App class — use statements, the
- * `EventSubscriberInterface` implementation, `getSubscribedEvents()` and the
- * handler — because the App is only wired to the event dispatcher when it
- * implements the subscriber interface. A bare handler body would leave the
- * operator assembling the class that makes the route live.
- *
- * `getName()` is part of the printed class because `AbstractExtension` leaves
- * it abstract: the snippet has to stay a class PHP can load, not a fragment
- * that only works when merged into an existing app/App.php.
+ * `EventSubscriberInterface` implementation, `getSubscribedEvents()`, the
+ * handler and `getName()` — because the App is only wired to the event
+ * dispatcher when it implements the subscriber interface, and because
+ * `AbstractExtension` leaves `getName()` abstract: a fragment that only
+ * works when merged into an existing app/App.php is not a class PHP can
+ * load.
  */
 final class MakeController extends AbstractMaker
 {
