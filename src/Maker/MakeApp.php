@@ -29,7 +29,7 @@ final class MakeApp extends AbstractMaker
              * Project-level App extension. Discovered by AppLoader via reflection;
              * one per installation, no manifest, no slug.
              *
-             * Override any of SporaExtensionInterface's ten data hooks to wire
+             * Override any of SporaExtensionInterface's data hooks to wire
              * project-local code in — `tools()` is the common one. Lifecycle is not
              * hooks: implement Symfony\Component\EventDispatcher\EventSubscriberInterface
              * and react to Spora\Events\{ContainerBuildingEvent, RoutesRegisteringEvent,
