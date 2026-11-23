@@ -10,8 +10,9 @@ jobs:
     name: Pest tests (PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        php: ['8.4']
+        php: ['8.4', '8.5', '8.6']
 
     steps:
       - uses: actions/checkout@v4
@@ -36,10 +37,15 @@ jobs:
       - name: Run tests
         run: ./vendor/bin/pest --no-coverage
 
+      # SonarCloud reads one coverage report, so only the 8.4 leg produces
+      # one. Every leg uploading under the same artifact name would fail
+      # the run on the second upload.
       - name: Run tests with coverage (Clover XML for SonarQube)
+        if: matrix.php == '8.4'
         run: composer test:coverage:clover
 
       - name: Upload coverage artifact
+        if: matrix.php == '8.4'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-clover
